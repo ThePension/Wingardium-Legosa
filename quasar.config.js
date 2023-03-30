@@ -69,6 +69,13 @@ module.exports = configure(function (ctx) {
 
       chainWebpack(chain) {
         chain
+          .externals({
+            // Exclude fs and path from webpack
+            // https://quasar.dev/quasar-cli/developing-electron-apps/electron-webpack#Excluding-Node-Modules-from-Webpack
+            fs: "fs",
+            path: "path",
+            crypto: "crypto",
+          })
           .plugin("eslint-webpack-plugin")
           .use(ESLintPlugin, [{ extensions: ["js", "vue"] }]);
       },
@@ -79,6 +86,8 @@ module.exports = configure(function (ctx) {
       server: {
         type: "http",
       },
+      // Specify IP
+      // host: "192.168.8.217",
       port: 8080,
       open: true, // opens browser window automatically
     },

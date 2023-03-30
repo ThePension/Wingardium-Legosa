@@ -1,4 +1,9 @@
 {
+  "browser": {
+    "fs": false,
+    "path": false,
+    "os": false
+  },
   "name": "wingardium-legosa",
   "version": "0.0.1",
   "description": "A Quasar Project",
@@ -16,6 +21,7 @@
     "axios": "^1.2.1",
     "core-js": "^3.6.5",
     "dotenv": "^16.0.3",
+    "path": "^0.12.7",
     "quasar": "^2.6.0",
     "simple-vue-camera": "^1.1.3",
     "vue": "^3.2.47",
@@ -28,6 +34,7 @@
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-vue": "^9.0.0",
     "eslint-webpack-plugin": "^3.1.1",
+    "fs": "^0.0.1-security",
     "prettier": "^2.5.1"
   },
   "browserslist": [
