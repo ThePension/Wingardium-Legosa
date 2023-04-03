@@ -2,12 +2,12 @@
 import cv from "@techstark/opencv-js";
 
 // Function to convert an image to grayscale
-function grayscale(blob) {
-  const img = cv.imread(blob);
+function grayscale(mat) {
+  const gray_mat = new cv.Mat();
   // Convert to grayscale
-  cv.cvtColor(img, img, cv.COLOR_RGBA2GRAY, 0);
+  cv.cvtColor(mat, gray_mat, cv.COLOR_BGR2GRAY);
 
-  return img;
+  return gray_mat;
 }
 
 // Export the grayscale function

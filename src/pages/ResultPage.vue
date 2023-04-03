@@ -3,33 +3,39 @@ import { ref, onMounted } from "vue";
 import { grayscale } from "../services/LegoAnalyzer.js";
 import cv from "@techstark/opencv-js";
 
-const imgUrl = ref(null);
-const img = ref(null);
-
-const pictureData = ref(null);
+const imgSrcElement = ref(null);
+const resultImgRef = ref(null);
 
 const processImage = () => {
-  const mat = cv.imread(img);
-  pictureData.value = grayscale(mat);
+  // Read image from src
+  const mat = cv.imread(imgSrcElement.value);
+
+  // Process the image
+  const gray_mat = grayscale(mat);
+
+  // Show the image using the canvas
+  cv.imshow(resultImgRef.value, gray_mat);
+
+  // Release memory
+  mat.delete();
+  gray_mat.delete();
 };
 
-const updateMatFromUrl = (event) => {
-  img.value = event.target.files[0];
+const updateSrcImage = (event) => {
+  imgSrcElement.value.src = URL.createObjectURL(event.target.files[0]);
 
-  imgUrl.value = URL.createObjectURL(img.value);
-
-  processImage();
+  // When image is loaded, process it
+  imgSrcElement.value.onload = () => {
+    processImage();
+  };
 };
-
-// onMounted(() => {
-//   pictureData.value = grayscale(mat);
-// });
 </script>
 
 <template>
   <h1>ResultPage</h1>
-  <img :src="imgUrl" style="width: 30%; height: 30%" />
-  <img :src="pictureData" />
+  <img id="imgSrc" style="width: 30%; height: 30%" ref="imgSrcElement" />
+  <canvas id="resultImg" ref="resultImgRef" />
+
   <!-- Image Input, that call updateMatFromUrl onchange -->
-  <input type="file" accept="image/*" @change="updateMatFromUrl" />
+  <input type="file" accept="image/*" @change="updateSrcImage" />
 </template>
