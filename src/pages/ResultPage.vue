@@ -2,9 +2,13 @@
 import { ref, onMounted } from "vue";
 import { grayscale } from "../services/LegoAnalyzer.js";
 import cv from "@techstark/opencv-js";
+import Camera from "simple-vue-camera";
 
 const imgSrcElement = ref(null);
 const resultImgRef = ref(null);
+
+const cameraActive = ref(true);
+const cam = ref(null);
 
 const processImage = () => {
   // Read image from src
@@ -21,8 +25,18 @@ const processImage = () => {
   gray_mat.delete();
 };
 
-const updateSrcImage = (event) => {
-  imgSrcElement.value.src = URL.createObjectURL(event.target.files[0]);
+const startCamera = () => {
+  cameraActive.value = true;
+  cam.value.start();
+};
+
+const takePicture = async () => {
+  const picture = await cam.value.snapshot();
+  imgSrcElement.value.src = URL.createObjectURL(picture);
+
+  // Stop the camera
+  cam.value.stop();
+  cameraActive.value = false;
 
   // When image is loaded, process it
   imgSrcElement.value.onload = () => {
@@ -33,9 +47,16 @@ const updateSrcImage = (event) => {
 
 <template>
   <h1>ResultPage</h1>
+
+  <!-- <input type="file" accept="image/*" @change="updateSrcImage" /> -->
+
   <img id="imgSrc" style="width: 30%; height: 30%" ref="imgSrcElement" />
   <canvas id="resultImg" ref="resultImgRef" />
 
-  <!-- Image Input, that call updateMatFromUrl onchange -->
-  <input type="file" accept="image/*" @change="updateSrcImage" />
+  <button @click="takePicture">Prendre une photo</button>
+  <camera
+    v-if="cameraActive"
+    :resolution="{ width: 375, height: 812 }"
+    ref="cam"
+  ></camera>
 </template>
