@@ -26,8 +26,12 @@ const processImage = () => {
 };
 
 const startCamera = () => {
+  // Hide the image
+  imgSrcElement.value.style.display = "none";
+  resultImgRef.value.style.display = "none";
+
   cameraActive.value = true;
-  cam.value.start();
+  // cam.value.start();
 };
 
 const takePicture = async () => {
@@ -37,6 +41,10 @@ const takePicture = async () => {
   // Stop the camera
   cam.value.stop();
   cameraActive.value = false;
+
+  // Display the image
+  imgSrcElement.value.style.display = "inline-block";
+  resultImgRef.value.style.display = "inline-block";
 
   // When image is loaded, process it
   imgSrcElement.value.onload = () => {
@@ -53,7 +61,9 @@ const takePicture = async () => {
   <img id="imgSrc" style="width: 30%; height: 30%" ref="imgSrcElement" />
   <canvas id="resultImg" ref="resultImgRef" />
 
-  <button @click="takePicture">Prendre une photo</button>
+  <button @click="startCamera" v-if="!cameraActive">Démarrer la caméra</button>
+
+  <button @click="takePicture" v-if="cameraActive">Prendre une photo</button>
   <camera
     v-if="cameraActive"
     :resolution="{ width: 375, height: 812 }"
