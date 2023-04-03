@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import { grayscale } from "../services/LegoAnalyzer.js";
+import { gaussianBlur, grayscale } from "../services/LegoAnalyzer.js";
 import cv from "@techstark/opencv-js";
 import Camera from "simple-vue-camera";
 
@@ -15,14 +15,17 @@ const processImage = () => {
   const mat = cv.imread(imgSrcElement.value);
 
   // Process the image
-  const gray_mat = grayscale(mat);
+  //const gray_mat = grayscale(mat);
+
+  const blurred_image = gaussianBlur(mat, 8);
 
   // Show the image using the canvas
-  cv.imshow(resultImgRef.value, gray_mat);
+  cv.imshow(resultImgRef.value, blurred_image);
 
   // Release memory
   mat.delete();
-  gray_mat.delete();
+  //gray_mat.delete();
+  blurred_image.delete();
 };
 
 const startCamera = () => {
