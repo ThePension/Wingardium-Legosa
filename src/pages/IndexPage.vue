@@ -1,18 +1,39 @@
 <template>
-  <div>
-    <div v-if="!cameraActive">
-      <button @click="startCamera">Démarrer la caméra</button>
+  <div class="q-mx-md">
+    <h4 class="text-center">LEGO recognizer</h4>
+
+    <div class="row justify-center" v-if="!cameraActive">
+      <q-btn
+        @click="startCamera"
+        color="primary"
+        icon-right="camera_enhance"
+        label="Start camera"
+      />
     </div>
     <div v-else>
-      <button @click="takePicture">Prendre une photo</button>
       <camera
         :resolution="{ width: 375, height: 812 }"
         ref="camera"
         autoplay
       ></camera>
+
+      <div class="row justify-center q-mt-md">
+        <q-btn
+          @click="takePicture"
+          color="secondary"
+          icon-right="camera_enhance"
+          label="Take picture"
+        />
+      </div>
     </div>
-    <div v-if="pictureTaken">
-      <img :src="pictureData" />
+    <div class="q-mt-lg" v-if="pictureTaken">
+      <q-img
+        :src="pictureData"
+        :fit="scale - down"
+        :ratio="4 / 3"
+        spinner-color="white"
+        style="max-width: 100%"
+      />
     </div>
   </div>
 </template>
