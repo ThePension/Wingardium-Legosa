@@ -1,7 +1,9 @@
 // import opencv
 import cv from "@techstark/opencv-js";
 
-// Function to convert an image to grayscale
+/**
+ * Function to convert an image to grayscale
+ */
 function grayscale(mat) {
   const gray_mat = new cv.Mat();
 
@@ -11,6 +13,9 @@ function grayscale(mat) {
   return gray_mat;
 }
 
+/**
+ * Function that applies a gaussian blur to an image with the kernelSize in parameter
+ */
 function gaussianBlur(mat, kernelSize = 3) {
   // kernelSize must be an odd number !
   // kernlSize must also be bigger or equal than 3
@@ -31,5 +36,115 @@ function gaussianBlur(mat, kernelSize = 3) {
   return blured_mat;
 }
 
-// Export the grayscale function
-export { grayscale, gaussianBlur };
+/**
+ * Function that returns an array with mat channels (RGBA)
+ */
+function splitColors(mat) {
+  const mat_colors = {};
+
+  let channels = new cv.MatVector();
+  cv.split(mat, channels);
+
+  mat_colors.R = channels.get(0);
+  mat_colors.G = channels.get(1);
+  mat_colors.B = channels.get(2);
+  mat_colors.A = channels.get(3);
+
+  channels.delete();
+
+  return mat_colors;
+}
+
+/**
+ * Function that applies canny edges detection algorithm
+ */
+function canny(
+  mat,
+  threshold1 = 50,
+  threshold2 = 100,
+  apertureSize = 3,
+  l2gradient = false
+) {
+  const canny = new cv.Mat();
+
+  cv.Canny(mat, canny, threshold1, threshold2, apertureSize, l2gradient);
+
+  return canny;
+}
+
+/**
+ * Function that extract edges with laplacian filter
+ */
+function laplacian(
+  mat,
+  depth = cv.CV_8U,
+  kSize = 1,
+  scale = 1,
+  delta = 0,
+  borderType = cv.BORDER_DEFAULT
+) {
+  const edges = new cv.Mat();
+
+  cv.Laplacian(mat, edges, depth, kSize, scale, delta, borderType);
+
+  return edges;
+}
+
+/**
+ * Function that applies a threshold
+ */
+function thresholdBinary(mat, thresh = 50, maxVal = 200) {
+  const threshold = new cv.Mat();
+
+  cv.threshold(mat, threshold, thresh, maxVal, cv.THRESH_BINARY);
+
+  return threshold;
+}
+
+/**
+ * Function that applies opening on an image
+ */
+function opening(mat, kSize = 5) {
+  let open = new cv.Mat();
+
+  let M = cv.Mat.ones(kSize, kSize, cv.CV_8U);
+  let anchor = new cv.Point(-1, -1);
+
+  cv.morphologyEx(
+    mat,
+    open,
+    cv.MORPH_OPEN,
+    M,
+    anchor,
+    1,
+    cv.BORDER_CONSTANT,
+    cv.morphologyDefaultBorderValue()
+  );
+
+  return open;
+}
+
+/**
+ * Function that applies closing on an image
+ */
+function closing(mat, kSize = 5) {
+  let close = new cv.Mat();
+
+  let M = cv.Mat.ones(kSize, kSize, cv.CV_8U);
+
+  cv.morphologyEx(mat, close, cv.MORPH_CLOSE, M);
+
+  return close;
+}
+
+// Export the functions
+export {
+  grayscale,
+  gaussianBlur,
+  splitColors,
+  canny,
+  laplacian,
+  thresholdBinary,
+  opening,
+  closing,
+};
