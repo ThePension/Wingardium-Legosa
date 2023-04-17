@@ -5,13 +5,20 @@ import FullScreenCam from "src/components/FullScreenCam.vue";
 
 const pictureTaken = ref(false);
 const pictureData = ref(null);
+
+const onImgUpdate = (img) => {
+  pictureData.value = img;
+  pictureTaken.value = true;
+};
 </script>
 
 <template>
   <full-screen-cam
+    v-if="!pictureTaken"
     v-model="pictureData"
-    @update:modelValue="pictureTaken = true"
+    @update:img="onImgUpdate"
   />
+
   <div class="q-mx-md">
     <div class="q-mt-lg" v-if="pictureTaken">
       <q-img

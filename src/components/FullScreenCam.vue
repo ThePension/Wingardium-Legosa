@@ -3,6 +3,13 @@ import { ref, onMounted } from "vue";
 
 import Camera from "simple-vue-camera";
 
+const emit = defineEmits(["update:img"]);
+const props = defineProps({
+  img: {
+    default: null,
+  },
+});
+
 // Get front and back camera ids
 const frontCamId = ref(null);
 const backCamId = ref(null);
@@ -13,7 +20,6 @@ const cameraActive = ref(true);
 const pictureTaken = ref(false);
 
 const cam = ref(null);
-const modelValue = ref(null);
 
 const img = ref(null);
 const img_url = ref(null);
@@ -37,9 +43,8 @@ const takePicture = async () => {
 };
 
 const acceptPicture = () => {
-  modelValue.value = img.value.src;
-
-  $emit("update:modelValue", modelValue.value);
+  // Emit the picture data
+  emit("update:img", img_url.value);
 };
 
 const retakePicture = () => {
@@ -130,10 +135,3 @@ onMounted(() => {
     :fit="screenRatio - 0.1"
   />
 </template>
-
-<script>
-export default {
-  props: ["modelValue"],
-  emits: ["update:modelValue"],
-};
-</script>
