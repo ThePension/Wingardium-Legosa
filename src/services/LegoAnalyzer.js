@@ -33,8 +33,6 @@ function gaussianBlur(mat, kernelSize = 3) {
   // Gaussian Blur
   cv.GaussianBlur(mat, blured_mat, kernel, 0, 0, cv.BORDER_DEFAULT);
 
-  kernel.delete();
-
   return blured_mat;
 }
 
@@ -147,18 +145,18 @@ function closing(mat, kSize = 5) {
  * Function that return the contours of an image
  */
 function findBorders(mat) {
-  const borders = new cv.MatVector();
-  const hierarchy = new cv.Mat();
+  const borders = {};
+
+  borders.contours = new cv.MatVector();
+  borders.hierarchy = new cv.Mat();
 
   cv.findContours(
     mat,
-    borders,
-    hierarchy,
+    borders.contours,
+    borders.hierarchy,
     cv.RETR_TREE,
     cv.CHAIN_APPROX_SIMPLE
   );
-
-  hierarchy.delete();
 
   return borders;
 }
@@ -170,11 +168,81 @@ function displayBorders(mat, borders) {
   let mat_borders = cv.Mat.zeros(mat.rows, mat.cols, cv.CV_8UC3);
   let color = new cv.Scalar(255, 0, 0);
 
-  for (let i = 0; i < borders.size(); i++) {
-    cv.drawContours(mat_borders, borders, i, color, 1, cv.LINE_8);
+  let contours = borders.contours;
+  let hierarchy = borders.hierarchy;
+
+  for (let i = 0; i < contours.size(); i++) {
+    let area = cv.contourArea(contours.get(i), false);
+
+    // Getting rid of the false borders (LEGO pin)
+    if (area > 20) {
+      cv.drawContours(
+        mat_borders,
+        contours,
+        i,
+        color,
+        1,
+        cv.LINE_8,
+        hierarchy,
+        0
+      );
+    }
   }
 
   return mat_borders;
+}
+
+function moments(border) {
+  return cv.moments(border, false);
+}
+
+function area(border) {
+  return cv.contourArea(border, false);
+}
+
+function perimeter(border) {
+  return cv.arcLength(border, false);
+}
+
+function convex_area(border) {
+  let hull = cv.convexHull(border, false);
+  return area(hull);
+}
+
+function convex_perimeter(border) {
+  let hull = cv.convexHull(border, false);
+  return perimeter(hull);
+}
+
+function gravity_center_dx(border) {
+  let M = moments(border);
+  return M.m10 / M.m00;
+}
+
+function gravity_center_dy(border) {
+  let M = moments(border);
+  return M.m01 / M.m00;
+}
+
+function excentricite(border) {
+  return 0;
+}
+
+function circularity(border) {
+  let area = area(border);
+  let perimeter = perimeter(border);
+
+  return (4 * Math.PI * area) / (perimeter * perimeter);
+}
+
+function allongement(border) {
+  let area = area(border);
+  let perimeter = perimeter(border);
+
+  let lequ = (perimeter + Math.sqrt(perimeter * perimeter - 16 * area)) / 4;
+  let Lequ = area / lequ;
+
+  return Lequ / lequ;
 }
 
 // Export the functions

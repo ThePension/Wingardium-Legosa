@@ -30,31 +30,53 @@ const updateSrcImage = (event) => {
   };
 };
 
+const edgesLaplacian = (mat) => {
+  const mat_blurred = gaussianBlur(mat, 5);
+  const gray = grayscale(mat_blurred);
+  const edges = laplacian(gray, cv.CV_8U, 5, 1);
+  const tresh = thresholdBinary(edges, 200, 255);
+
+  mat_blurred.delete();
+  gray.delete();
+  edges.delete();
+
+  return tresh;
+};
+
+const edgesCanny = (mat) => {
+  const gray = grayscale(mat);
+  const canny_edges = canny(gray);
+
+  gray.delete();
+
+  return canny_edges;
+};
+
+const contourDetection = (mat) => {
+  const borders = findBorders(mat);
+  const contours_mat = displayBorders(mat, borders);
+
+  borders.contours.delete();
+  borders.hierarchy.delete();
+
+  return contours_mat;
+};
+
 const processImage = () => {
   // Read image from src
   const mat = cv.imread(imgSrcElement.value);
 
-  // Process the image
-  const gray = grayscale(mat);
-  const edges = laplacian(gray, cv.CV_8U, 5, 1);
-  const tresh = thresholdBinary(edges, 200, 255);
-  //onst close = closing(tresh, 3);
-  const open = opening(tresh, 2);
-
-  //const gray = grayscale(mat);
-  //const tresh = thresholdBinary(gray, 150, 255);
-  const borders = findBorders(open);
-  const img_borders = displayBorders(mat, borders);
+  // Processing
+  const processed_mat = edgesLaplacian(mat);
+  const contours_mat = contourDetection(processed_mat);
 
   // Show the image using the canvas
-  cv.imshow(resultImgRef.value, img_borders);
+  cv.imshow(resultImgRef.value, contours_mat);
 
   // Release memory
+  processed_mat.delete();
+  contours_mat.delete();
   mat.delete();
-  gray.delete();
-  tresh.delete();
-  borders.delete();
-  img_borders.delete();
 };
 
 const startCamera = () => {
