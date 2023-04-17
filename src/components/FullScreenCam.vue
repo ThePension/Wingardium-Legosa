@@ -13,22 +13,35 @@ const cameraActive = ref(true);
 const cam = ref(null);
 const modelValue = ref(null);
 
+const img = ref(null);
+const img_url = ref(null);
+
+const screenWidth = ref(null);
+const screenHeight = ref(null);
+const screenRatio = ref(null);
+
 const startCamera = () => {
   cameraActive.value = true;
   cam.value.start();
 };
 
 const takePicture = async () => {
-  const picture = await cam.value.snapshot();
-  console.log(picture);
-  const img = document.getElementById("img");
-  img.src = URL.createObjectURL(picture);
+  img.value = await cam.value.snapshot();
+
+  cameraActive.value = false;
+
+  img_url.value = URL.createObjectURL(img.value);
 };
 
 const acceptPicture = () => {
-  modelValue.value = img.src;
+  modelValue.value = img.value.src;
 
   $emit("update:modelValue", modelValue.value);
+};
+
+const retakePicture = () => {
+  cameraActive.value = true;
+  // cam.value.start();
 };
 
 const switchCamera = () => {
@@ -56,20 +69,27 @@ onMounted(() => {
     currentCamId.value = backCamId.value;
   });
 
+  // Get screen size
+  screenWidth.value = window.innerWidth;
+  screenHeight.value = window.innerHeight;
+
+  // Get screen ratio
+  screenRatio.value = screenWidth.value / screenHeight.value;
+
   startCamera();
 });
 </script>
 
 <template>
-  <camera v-if="cameraActive" ref="cam"> </camera>
+  <camera v-if="cameraActive" ref="cam"></camera>
 
   <!-- Take picture button -->
-  <!-- <q-btn
+  <q-btn
     class="absolute-bottom-right"
     color="primary"
     icon="camera"
     @click="takePicture"
-  /> -->
+  />
 
   <!-- Accept picture button -->
   <!-- <q-btn
@@ -88,7 +108,12 @@ onMounted(() => {
     v-if="frontCamId && backCamId"
   />
 
-  <!-- <img id="img" style="width: 30%; height: 30%" ref="img" /> -->
+  <q-img
+    v-if="img_url"
+    :src="img_url"
+    :ratio="screenRatio"
+    :fit="screenRatio - 0.1"
+  />
 </template>
 
 <script>
