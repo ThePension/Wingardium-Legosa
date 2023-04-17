@@ -11,6 +11,8 @@ import {
   thresholdBinary,
   opening,
   closing,
+  findBorders,
+  displayBorders,
 } from "../services/LegoAnalyzer.js";
 
 const imgSrcElement = ref(null);
@@ -36,19 +38,23 @@ const processImage = () => {
   const gray = grayscale(mat);
   const edges = laplacian(gray, cv.CV_8U, 5, 1);
   const tresh = thresholdBinary(edges, 200, 255);
-  //const close = closing(tresh, 3);
+  //onst close = closing(tresh, 3);
   const open = opening(tresh, 2);
 
+  //const gray = grayscale(mat);
+  //const tresh = thresholdBinary(gray, 150, 255);
+  const borders = findBorders(open);
+  const img_borders = displayBorders(mat, borders);
+
   // Show the image using the canvas
-  cv.imshow(resultImgRef.value, open);
+  cv.imshow(resultImgRef.value, img_borders);
 
   // Release memory
   mat.delete();
-  edges.delete();
   gray.delete();
   tresh.delete();
-  //close.delete();
-  open.delete();
+  borders.delete();
+  img_borders.delete();
 };
 
 const startCamera = () => {

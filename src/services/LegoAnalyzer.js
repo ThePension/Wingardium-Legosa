@@ -33,6 +33,8 @@ function gaussianBlur(mat, kernelSize = 3) {
   // Gaussian Blur
   cv.GaussianBlur(mat, blured_mat, kernel, 0, 0, cv.BORDER_DEFAULT);
 
+  kernel.delete();
+
   return blured_mat;
 }
 
@@ -121,6 +123,8 @@ function opening(mat, kSize = 5) {
     cv.morphologyDefaultBorderValue()
   );
 
+  M.delete();
+
   return open;
 }
 
@@ -134,7 +138,43 @@ function closing(mat, kSize = 5) {
 
   cv.morphologyEx(mat, close, cv.MORPH_CLOSE, M);
 
+  M.delete();
+
   return close;
+}
+
+/**
+ * Function that return the contours of an image
+ */
+function findBorders(mat) {
+  const borders = new cv.MatVector();
+  const hierarchy = new cv.Mat();
+
+  cv.findContours(
+    mat,
+    borders,
+    hierarchy,
+    cv.RETR_TREE,
+    cv.CHAIN_APPROX_SIMPLE
+  );
+
+  hierarchy.delete();
+
+  return borders;
+}
+
+/**
+ * Function that returns an image of the borders
+ */
+function displayBorders(mat, borders) {
+  let mat_borders = cv.Mat.zeros(mat.rows, mat.cols, cv.CV_8UC3);
+  let color = new cv.Scalar(255, 0, 0);
+
+  for (let i = 0; i < borders.size(); i++) {
+    cv.drawContours(mat_borders, borders, i, color, 1, cv.LINE_8);
+  }
+
+  return mat_borders;
 }
 
 // Export the functions
@@ -147,4 +187,6 @@ export {
   thresholdBinary,
   opening,
   closing,
+  findBorders,
+  displayBorders,
 };
