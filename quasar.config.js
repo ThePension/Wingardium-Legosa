@@ -88,6 +88,7 @@ module.exports = configure(function (ctx) {
       },
       // Specify IP
       // host: "192.168.8.217",
+      // host: "157.26.106.116",
       port: 8080,
       open: true, // opens browser window automatically
     },
