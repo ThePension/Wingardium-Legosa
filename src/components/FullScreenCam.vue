@@ -10,6 +10,8 @@ const backCamId = ref(null);
 const currentCamId = ref(null);
 
 const cameraActive = ref(true);
+const pictureTaken = ref(false);
+
 const cam = ref(null);
 const modelValue = ref(null);
 
@@ -29,6 +31,7 @@ const takePicture = async () => {
   img.value = await cam.value.snapshot();
 
   cameraActive.value = false;
+  pictureTaken.value = true;
 
   img_url.value = URL.createObjectURL(img.value);
 };
@@ -41,7 +44,7 @@ const acceptPicture = () => {
 
 const retakePicture = () => {
   cameraActive.value = true;
-  // cam.value.start();
+  pictureTaken.value = false;
 };
 
 const switchCamera = () => {
@@ -66,6 +69,7 @@ onMounted(() => {
     if (backCam) backCamId.value = backCam.deviceId;
     else backCamId.value = null;
 
+    // Set the default camera to the back one
     currentCamId.value = backCamId.value;
   });
 
@@ -74,7 +78,7 @@ onMounted(() => {
   screenHeight.value = window.innerHeight;
 
   // Get screen ratio
-  screenRatio.value = screenWidth.value / screenHeight.value;
+  screenRatio.value = 1; // screenWidth.value / screenHeight.value;
 
   startCamera();
 });
@@ -85,6 +89,7 @@ onMounted(() => {
 
   <!-- Take picture button -->
   <q-btn
+    v-if="cameraActive && !pictureTaken"
     class="absolute-bottom-right"
     color="primary"
     icon="camera"
@@ -92,12 +97,22 @@ onMounted(() => {
   />
 
   <!-- Accept picture button -->
-  <!-- <q-btn
-    class="absolute-bottom-left"
+  <q-btn
+    v-if="pictureTaken"
+    class="absolute-bottom-right"
     color="primary"
     icon="check"
     @click="acceptPicture"
-  /> -->
+  />
+
+  <!-- Retake picture button -->
+  <q-btn
+    v-if="pictureTaken"
+    class="absolute-bottom-left"
+    color="primary"
+    icon="undo"
+    @click="retakePicture"
+  />
 
   <!-- Switch camera button -->
   <q-btn
@@ -109,7 +124,7 @@ onMounted(() => {
   />
 
   <q-img
-    v-if="img_url"
+    v-if="pictureTaken"
     :src="img_url"
     :ratio="screenRatio"
     :fit="screenRatio - 0.1"
