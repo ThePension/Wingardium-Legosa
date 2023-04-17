@@ -13,6 +13,7 @@ import {
   closing,
   findBorders,
   displayBorders,
+  display_convex_hull,
 } from "../services/LegoAnalyzer.js";
 
 const imgSrcElement = ref(null);
@@ -62,13 +63,23 @@ const contourDetection = (mat) => {
   return contours_mat;
 };
 
+const convexEnvelopeDetection = (mat) => {
+  const borders = findBorders(mat);
+  const contours_mat = display_convex_hull(mat, borders);
+
+  borders.contours.delete();
+  borders.hierarchy.delete();
+
+  return contours_mat;
+};
+
 const processImage = () => {
   // Read image from src
   const mat = cv.imread(imgSrcElement.value);
 
   // Processing
   const processed_mat = edgesLaplacian(mat);
-  const contours_mat = contourDetection(processed_mat);
+  const contours_mat = convexEnvelopeDetection(processed_mat);
 
   // Show the image using the canvas
   cv.imshow(resultImgRef.value, contours_mat);

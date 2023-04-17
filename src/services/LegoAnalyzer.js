@@ -192,6 +192,44 @@ function displayBorders(mat, borders) {
   return mat_borders;
 }
 
+/**
+ * Function that returns a new Mat with the convex envelopes
+ */
+function display_convex_hull(mat, borders) {
+  let mat_convex_hull = cv.Mat.zeros(mat.rows, mat.cols, cv.CV_8UC3);
+  let color = new cv.Scalar(255, 0, 0);
+  let hull = new cv.MatVector();
+
+  let contours = borders.contours;
+  let hierarchy = borders.hierarchy;
+
+  for (let i = 0; i < contours.size(); ++i) {
+    let tmp = new cv.Mat();
+    let cnt = contours.get(i);
+
+    cv.convexHull(cnt, tmp, false, true);
+    hull.push_back(tmp);
+
+    cnt.delete();
+    tmp.delete();
+  }
+
+  for (let i = 0; i < contours.size(); ++i) {
+    cv.drawContours(
+      mat_convex_hull,
+      hull,
+      i,
+      color,
+      1,
+      cv.LINE_8,
+      hierarchy,
+      0
+    );
+  }
+
+  return mat_convex_hull;
+}
+
 function moments(border) {
   return cv.moments(border, false);
 }
@@ -257,4 +295,5 @@ export {
   closing,
   findBorders,
   displayBorders,
+  display_convex_hull,
 };
