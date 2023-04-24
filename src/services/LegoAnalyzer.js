@@ -154,7 +154,7 @@ function findBorders(mat) {
     mat,
     borders.contours,
     borders.hierarchy,
-    cv.RETR_TREE,
+    cv.RETR_EXTERNAL,
     cv.CHAIN_APPROX_SIMPLE
   );
 
@@ -169,23 +169,13 @@ function displayBorders(mat, borders) {
   let color = new cv.Scalar(255, 0, 0);
 
   let contours = borders.contours;
-  let hierarchy = borders.hierarchy;
 
   for (let i = 0; i < contours.size(); i++) {
     let area = cv.contourArea(contours.get(i), false);
 
     // Getting rid of the false borders (LEGO pin)
     if (area > 20) {
-      cv.drawContours(
-        mat_borders,
-        contours,
-        i,
-        color,
-        1,
-        cv.LINE_8,
-        hierarchy,
-        0
-      );
+      cv.drawContours(mat_borders, contours, i, color, 1, cv.LINE_8);
     }
   }
 
@@ -201,30 +191,26 @@ function display_convex_hull(mat, borders) {
   let hull = new cv.MatVector();
 
   let contours = borders.contours;
-  let hierarchy = borders.hierarchy;
+  let nbContours = 0;
 
   for (let i = 0; i < contours.size(); ++i) {
-    let tmp = new cv.Mat();
-    let cnt = contours.get(i);
+    let area = cv.contourArea(contours.get(i), false);
 
-    cv.convexHull(cnt, tmp, false, true);
-    hull.push_back(tmp);
+    if (area > 20) {
+      nbContours += 1;
+      let tmp = new cv.Mat();
+      let cnt = contours.get(i);
 
-    cnt.delete();
-    tmp.delete();
+      cv.convexHull(cnt, tmp, false, true);
+      hull.push_back(tmp);
+
+      cnt.delete();
+      tmp.delete();
+    }
   }
 
-  for (let i = 0; i < contours.size(); ++i) {
-    cv.drawContours(
-      mat_convex_hull,
-      hull,
-      i,
-      color,
-      1,
-      cv.LINE_8,
-      hierarchy,
-      0
-    );
+  for (let i = 0; i < nbContours; ++i) {
+    cv.drawContours(mat_convex_hull, hull, i, color, 1, cv.LINE_8);
   }
 
   return mat_convex_hull;
