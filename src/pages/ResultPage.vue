@@ -13,7 +13,9 @@ import {
   closing,
   findBorders,
   displayBorders,
+  find_convex_hull,
   display_convex_hull,
+  caracterise,
 } from "../services/LegoAnalyzer.js";
 
 const imgSrcElement = ref(null);
@@ -65,10 +67,13 @@ const contourDetection = (mat) => {
 
 const convexEnvelopeDetection = (mat) => {
   const borders = findBorders(mat);
-  const contours_mat = display_convex_hull(mat, borders);
+  const convex_hulls = find_convex_hull(borders);
+  caracterise(convex_hulls);
+  const contours_mat = display_convex_hull(mat, convex_hulls);
 
   borders.contours.delete();
   borders.hierarchy.delete();
+  convex_hulls.delete();
 
   return contours_mat;
 };

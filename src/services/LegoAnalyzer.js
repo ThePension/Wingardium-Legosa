@@ -183,34 +183,41 @@ function displayBorders(mat, borders) {
 }
 
 /**
- * Function that returns a new Mat with the convex envelopes
+ * Function that extract the convex hull from borders
  */
-function display_convex_hull(mat, borders) {
-  let mat_convex_hull = cv.Mat.zeros(mat.rows, mat.cols, cv.CV_8UC3);
-  let color = new cv.Scalar(255, 0, 0);
-  let hull = new cv.MatVector();
+function find_convex_hull(borders) {
+  let convex_hulls = new cv.MatVector();
 
   let contours = borders.contours;
-  let nbContours = 0;
 
   for (let i = 0; i < contours.size(); ++i) {
     let area = cv.contourArea(contours.get(i), false);
 
+    // Getting rid of the false borders (LEGO pin)
     if (area > 20) {
-      nbContours += 1;
       let tmp = new cv.Mat();
       let cnt = contours.get(i);
 
       cv.convexHull(cnt, tmp, false, true);
-      hull.push_back(tmp);
+      convex_hulls.push_back(tmp);
 
       cnt.delete();
       tmp.delete();
     }
   }
 
-  for (let i = 0; i < nbContours; ++i) {
-    cv.drawContours(mat_convex_hull, hull, i, color, 1, cv.LINE_8);
+  return convex_hulls;
+}
+
+/**
+ * Function that returns a new Mat with the convex hulls
+ */
+function display_convex_hull(mat, convex_hulls) {
+  let mat_convex_hull = cv.Mat.zeros(mat.rows, mat.cols, cv.CV_8UC3);
+  let color = new cv.Scalar(255, 0, 0);
+
+  for (let i = 0; i < convex_hulls.size(); ++i) {
+    cv.drawContours(mat_convex_hull, convex_hulls, i, color, 1, cv.LINE_8);
   }
 
   return mat_convex_hull;
@@ -228,16 +235,6 @@ function perimeter(border) {
   return cv.arcLength(border, false);
 }
 
-function convex_area(border) {
-  let hull = cv.convexHull(border, false);
-  return area(hull);
-}
-
-function convex_perimeter(border) {
-  let hull = cv.convexHull(border, false);
-  return perimeter(hull);
-}
-
 function gravity_center_dx(border) {
   let M = moments(border);
   return M.m10 / M.m00;
@@ -248,25 +245,83 @@ function gravity_center_dy(border) {
   return M.m01 / M.m00;
 }
 
+function bounding_rect(border) {
+  return cv.boundingRect(border);
+}
+
+function ellipse_approx(border) {
+  return cv.fitEllipse(border);
+}
+
 function excentricite(border) {
-  return 0;
+  let ellipse = ellipse_approx(border);
+
+  let w = ellipse.size.width;
+  let h = ellipse.size.height;
+
+  let factor = w / h;
+
+  if (w > h) {
+    factor = h / w;
+  }
+
+  return Math.sqrt(1 - factor);
 }
 
 function circularity(border) {
-  let area = area(border);
-  let perimeter = perimeter(border);
+  let a = area(border);
+  let p = perimeter(border);
 
-  return (4 * Math.PI * area) / (perimeter * perimeter);
+  return (4 * Math.PI * a) / (p * p);
 }
 
 function allongement(border) {
-  let area = area(border);
-  let perimeter = perimeter(border);
+  let rect = bounding_rect(border);
 
-  let lequ = (perimeter + Math.sqrt(perimeter * perimeter - 16 * area)) / 4;
-  let Lequ = area / lequ;
+  let w = rect.width;
+  let h = rect.height;
 
-  return Lequ / lequ;
+  return w / h;
+}
+
+function caracterise(convex_hulls) {
+  const caracteristics = [];
+
+  for (let i = 0; i < convex_hulls.size(); ++i) {
+    let c = {};
+    let hull = convex_hulls.get(i);
+
+    let LEGO_gcx = gravity_center_dx(hull);
+    let LEGO_gcy = gravity_center_dy(hull);
+    let LEGO_circ = circularity(hull);
+    let LEGO_allong = allongement(hull);
+    let LEGO_excen = excentricite(hull);
+
+    c.gcx = LEGO_gcx;
+    c.gcy = LEGO_gcy;
+    c.circularity = LEGO_circ;
+    c.allongement = LEGO_allong;
+    c.excentricity = LEGO_excen;
+
+    caracteristics.push(c);
+
+    console.log(
+      "LEGO (" +
+        (i + 1) +
+        ") : gcx=" +
+        LEGO_gcx +
+        ", gcy=" +
+        LEGO_gcy +
+        ", circularity=" +
+        LEGO_circ +
+        ", allongement=" +
+        LEGO_allong +
+        ", excentricity=" +
+        LEGO_excen
+    );
+  }
+
+  return caracteristics;
 }
 
 // Export the functions
@@ -281,5 +336,7 @@ export {
   closing,
   findBorders,
   displayBorders,
+  find_convex_hull,
   display_convex_hull,
+  caracterise,
 };
