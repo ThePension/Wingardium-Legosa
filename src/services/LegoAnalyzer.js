@@ -303,6 +303,72 @@ function allongement(border) {
   return allong;
 }
 
+/**
+ * Homemade classification function
+ */
+function guess_label(caracteristics) {
+  let c_circularity = caracteristics.circularity;
+  let c_allongement = caracteristics.allongement;
+  let c_excentricity = caracteristics.excentricity;
+  let c_area = caracteristics.area;
+  let c_perimeter = caracteristics.perimeter;
+
+  // Square LEGO
+  if (c_allongement - 1 < 0.1) {
+    if (c_perimeter < 50) {
+      return "CARRE_UN";
+    } else if (c_perimeter < 150) {
+      return "CARRE_QUATRE";
+    }
+    return "CARRE_HUIT";
+  }
+
+  // 3x2 (ratio) LEGO
+  if (c_allongement < 1.6) {
+    return "RECTANGLE_3_2";
+  }
+
+  // 2x1 (ratio) LEGO
+  if (c_allongement < 2.2) {
+    if (c_perimeter < 100) {
+      return "RECTANGLE_2_1";
+    }
+    return "RECTANGLE_4_2";
+  }
+
+  // 3x1 (ratio) LEGO
+  if (c_allongement < 3.2) {
+    if (c_perimeter < 150) {
+      return "RECTANGLE_3_1";
+    }
+    return "RECTANGLE_6_2";
+  }
+
+  // 4x1 (ratio) LEGO
+  if (c_allongement < 4.2) {
+    if (c_perimeter < 200) {
+      return "RECTANGLE_4_1";
+    }
+    return "RECTANGLE_8_2";
+  }
+
+  // 5x1 (ratio) LEGO
+  if (c_allongement < 5.2) {
+    if (c_perimeter < 200) {
+      return "RECTANGLE_5_1";
+    }
+    return "RECTANGLE_10_2";
+  }
+
+  // 6x1 (ratio) LEGO
+  if (c_allongement < 6.2) {
+    if (c_perimeter < 250) {
+      return "RECTANGLE_6_1";
+    }
+    return "RECTANGLE_12_2";
+  }
+}
+
 function caracterise(hull) {
   let c = {};
 
@@ -320,6 +386,10 @@ function caracterise(hull) {
   c.circularity = LEGO_circ;
   c.allongement = LEGO_allong;
   c.excentricity = LEGO_excen;
+  c.area = area(hull);
+  c.perimeter = perimeter(hull);
+
+  c.class = guess_label(c);
 
   console.log(
     "LEGO : gcx=" +
@@ -331,7 +401,13 @@ function caracterise(hull) {
       ", allongement=" +
       LEGO_allong +
       ", excentricity=" +
-      LEGO_excen
+      LEGO_excen +
+      ", area=" +
+      c.area +
+      ", perimeter=" +
+      c.perimeter +
+      ", class=" +
+      c.class
   );
 
   return c;
