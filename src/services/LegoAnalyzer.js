@@ -223,6 +223,19 @@ function display_convex_hull(mat, convex_hulls) {
   return mat_convex_hull;
 }
 
+/**
+ * Function draws convex hull on original image
+ */
+function draw_hulls_on_image(mat, convex_hulls) {
+  let color = new cv.Scalar(255, 255, 255);
+
+  for (let i = 0; i < convex_hulls.size(); ++i) {
+    cv.drawContours(mat, convex_hulls, i, color, 2, cv.LINE_8);
+  }
+
+  return mat;
+}
+
 function moments(border) {
   return cv.moments(border, false);
 }
@@ -276,52 +289,61 @@ function circularity(border) {
 }
 
 function allongement(border) {
-  let rect = bounding_rect(border);
+  let rect = cv.minAreaRect(border);
 
-  let w = rect.width;
-  let h = rect.height;
+  let w = rect.size.width;
+  let h = rect.size.height;
 
-  return w / h;
+  let allong = w / h;
+
+  if (w < h) {
+    allong = h / w;
+  }
+
+  return allong;
 }
 
-function caracterise(convex_hulls) {
+function caracterise(hull) {
+  let c = {};
+
+  console.log(hull);
+  console.log();
+
+  let LEGO_gcx = gravity_center_dx(hull);
+  let LEGO_gcy = gravity_center_dy(hull);
+  let LEGO_circ = circularity(hull);
+  let LEGO_allong = allongement(hull);
+  let LEGO_excen = excentricite(hull);
+
+  c.gcx = LEGO_gcx;
+  c.gcy = LEGO_gcy;
+  c.circularity = LEGO_circ;
+  c.allongement = LEGO_allong;
+  c.excentricity = LEGO_excen;
+
+  console.log(
+    "LEGO : gcx=" +
+      LEGO_gcx +
+      ", gcy=" +
+      LEGO_gcy +
+      ", circularity=" +
+      LEGO_circ +
+      ", allongement=" +
+      LEGO_allong +
+      ", excentricity=" +
+      LEGO_excen
+  );
+
+  return c;
+}
+
+function caracterise_hulls(convex_hulls) {
   const caracteristics = [];
 
   for (let i = 0; i < convex_hulls.size(); ++i) {
-    let c = {};
     let hull = convex_hulls.get(i);
-
-    let LEGO_gcx = gravity_center_dx(hull);
-    let LEGO_gcy = gravity_center_dy(hull);
-    let LEGO_circ = circularity(hull);
-    let LEGO_allong = allongement(hull);
-    let LEGO_excen = excentricite(hull);
-
-    c.gcx = LEGO_gcx;
-    c.gcy = LEGO_gcy;
-    c.circularity = LEGO_circ;
-    c.allongement = LEGO_allong;
-    c.excentricity = LEGO_excen;
-
-    caracteristics.push(c);
-
-    console.log(
-      "LEGO (" +
-        (i + 1) +
-        ") : gcx=" +
-        LEGO_gcx +
-        ", gcy=" +
-        LEGO_gcy +
-        ", circularity=" +
-        LEGO_circ +
-        ", allongement=" +
-        LEGO_allong +
-        ", excentricity=" +
-        LEGO_excen
-    );
+    caracteristics.push(caracterise(hull));
   }
-
-  return caracteristics;
 }
 
 // Export the functions
@@ -339,4 +361,6 @@ export {
   find_convex_hull,
   display_convex_hull,
   caracterise,
+  caracterise_hulls,
+  draw_hulls_on_image,
 };
