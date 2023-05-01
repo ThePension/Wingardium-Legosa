@@ -44,7 +44,7 @@ const takePicture = async () => {
 
 const acceptPicture = () => {
   // Emit the picture data
-  emit("update:img", img_url.value);
+  emit("update:img", img.value);
 };
 
 const retakePicture = () => {

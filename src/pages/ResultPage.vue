@@ -21,15 +21,18 @@ import {
 
 import FullScreenCam from "src/components/FullScreenCam.vue";
 
-// const imgSrcElement = ref(null);
-// const resultImgRef = ref(null);
+const imgSrcElement = ref(null);
+const resultImgRef = ref(null);
 
-// const cameraActive = ref(true);
-// const cam = ref(null);
+const existingFile = ref(null);
 
 const onImgUpdate = (img) => {
-  takingPicture.value = false;
+  pictureUrl.value = URL.createObjectURL(img);
   pictureData.value = img;
+
+  imgSrcElement.value.src = URL.createObjectURL(img);
+
+  takingPicture.value = false;
   pictureTaken.value = true;
 
   legoCounter.value = 0;
@@ -38,21 +41,11 @@ const onImgUpdate = (img) => {
 
 const takingPicture = ref(false); // User is taking a picture
 const pictureTaken = ref(false); // Picture has been taken
+const pictureUrl = ref(null); // Picture url
 const pictureData = ref(null);
 
 const legoCounter = ref(0);
 const caracteristic = ref(null);
-
-// const updateSrcImage = (event) => {
-//   imgSrcElement.value.src = URL.createObjectURL(event.target.files[0]);
-
-//   legoCounter.value = 0;
-
-//   // When image is loaded, process it
-//   imgSrcElement.value.onload = () => {
-//     processImage();
-//   };
-// };
 
 const edgesLaplacian = (mat) => {
   const mat_blurred = gaussianBlur(mat, 5);
@@ -86,6 +79,19 @@ const contourDetection = (mat) => {
   return contours_mat;
 };
 
+const updateSrcImage = () => {
+  imgSrcElement.value.src = URL.createObjectURL(existingFile.value);
+
+  legoCounter.value = 0;
+  pictureTaken.value = true;
+
+  // When image is loaded, process it
+  imgSrcElement.value.onload = () => {
+    processImage();
+  };
+};
+
+
 const convexEnvelopeDetection = (mat, source) => {
   const borders = findBorders(mat);
   const convex_hulls = find_convex_hull(borders);
@@ -114,11 +120,10 @@ const legoCaracterise = (processed_mat, source_mat, i) => {
 
 const processImage = () => {
   // Read image from src
-  const source = cv.imread(imgSrcElement.value);
+  const source = cv.imread(imgSrcElement.value); // imgSrcElement
 
   // Processing
   const processed_mat = edgesLaplacian(source);
-  //const contours_mat = convexEnvelopeDetection(processed_mat, source);
 
   const singleLegoBorder_mat = legoCaracterise(
     processed_mat,
@@ -133,7 +138,6 @@ const processImage = () => {
   // Release memory
   processed_mat.delete();
   singleLegoBorder_mat.delete();
-  //mat.delete();
 };
 
 const nextLego = () => {
@@ -147,17 +151,10 @@ const previousLego = () => {
 };
 
 const startCamera = () => {
-  // Hide the image
-  // imgSrcElement.value.style.display = "none";
-  // resultImgRef.value.style.display = "none";
-
   // Erase previous datas
   caracteristic.value = null;
 
-  // cameraActive.value = true;
-  // cam.value.start();
   takingPicture.value = true;
-
 };
 
 const takePicture = async () => {
@@ -185,23 +182,20 @@ const takePicture = async () => {
   <div class="q-pa-md q-gutter-sm row"
     v-if="!takingPicture"
   >
-    <!-- <q-btn color="primary" icon="file_upload" label="Existing picture" /> -->
     <q-btn color="primary" outline icon-right="photo_camera" label="Take picture"
       class="col-12"
       size="lg"
+      align="between"
       @click="startCamera"
     />
-    <q-file color="primary" outlined label-color="primary" v-model="model" label="Existing picture"
+    <q-file color="primary" outlined label-color="primary" v-model="existingFile" label="Existing picture"
+      @update:model-value="updateSrcImage"
       class="col-12"
     >
       <template v-slot:append>
         <q-icon name="attachment" color="primary" />
       </template>
     </q-file>
-  </div>
-
-  <div class="q-pa-lg">
-    <input type="file" accept="image/*" @change="updateSrcImage" />
   </div>
 
   <div v-if="caracteristic" class="q-pa-lg">
@@ -257,30 +251,17 @@ const takePicture = async () => {
     </q-list>
   </div>
 
-  <!-- <input type="file" accept="image/*" @change="updateSrcImage" /> -->
+  <img id="imgSrc" style="width: 30%; height: 30%; display: none;"  ref="imgSrcElement" />
+  <canvas id="resultImg" ref="resultImgRef" />
 
-
-  <!-- <img id="imgSrc" style="width: 30%; height: 30%" ref="imgSrcElement" />
-  <canvas id="resultImg" ref="resultImgRef" /> -->
-
-  <button @click="previousLego" v-if="pictureTaken">Previous</button>
-  <button @click="nextLego" v-if="pictureTaken">Next</button>
+  <div v-if="pictureTaken">
+    <q-btn @click="previousLego" push color="white" text-color="primary" label="Previous" />
+    <q-btn @click="nextLego" push color="white" text-color="primary" label="Next" />
+  </div>
 
   <full-screen-cam
     v-if="takingPicture"
     v-model="pictureData"
     @update:img="onImgUpdate"
   />
-
-  <div class="q-mx-md">
-    <div class="q-mt-lg" v-if="pictureTaken">
-      <q-img
-        :src="pictureData"
-        :fit="scale - down"
-        :ratio="4 / 3"
-        spinner-color="white"
-        style="max-width: 100%"
-      />
-    </div>
-  </div>
 </template>
