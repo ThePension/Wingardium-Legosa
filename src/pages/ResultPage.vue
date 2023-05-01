@@ -1,6 +1,5 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import Camera from "simple-vue-camera";
 import cv from "@techstark/opencv-js";
 import {
   gaussianBlur,
@@ -20,25 +19,40 @@ import {
   draw_hulls_on_image,
 } from "../services/LegoAnalyzer.js";
 
-const imgSrcElement = ref(null);
-const resultImgRef = ref(null);
+import FullScreenCam from "src/components/FullScreenCam.vue";
 
-const cameraActive = ref(true);
-const cam = ref(null);
+// const imgSrcElement = ref(null);
+// const resultImgRef = ref(null);
+
+// const cameraActive = ref(true);
+// const cam = ref(null);
+
+const onImgUpdate = (img) => {
+  takingPicture.value = false;
+  pictureData.value = img;
+  pictureTaken.value = true;
+
+  legoCounter.value = 0;
+  processImage();
+};
+
+const takingPicture = ref(false); // User is taking a picture
+const pictureTaken = ref(false); // Picture has been taken
+const pictureData = ref(null);
 
 const legoCounter = ref(0);
 const caracteristic = ref(null);
 
-const updateSrcImage = (event) => {
-  imgSrcElement.value.src = URL.createObjectURL(event.target.files[0]);
+// const updateSrcImage = (event) => {
+//   imgSrcElement.value.src = URL.createObjectURL(event.target.files[0]);
 
-  legoCounter.value = 0;
+//   legoCounter.value = 0;
 
-  // When image is loaded, process it
-  imgSrcElement.value.onload = () => {
-    processImage();
-  };
-};
+//   // When image is loaded, process it
+//   imgSrcElement.value.onload = () => {
+//     processImage();
+//   };
+// };
 
 const edgesLaplacian = (mat) => {
   const mat_blurred = gaussianBlur(mat, 5);
@@ -134,14 +148,16 @@ const previousLego = () => {
 
 const startCamera = () => {
   // Hide the image
-  imgSrcElement.value.style.display = "none";
-  resultImgRef.value.style.display = "none";
+  // imgSrcElement.value.style.display = "none";
+  // resultImgRef.value.style.display = "none";
 
   // Erase previous datas
   caracteristic.value = null;
 
-  cameraActive.value = true;
+  // cameraActive.value = true;
   // cam.value.start();
+  takingPicture.value = true;
+
 };
 
 const takePicture = async () => {
@@ -165,7 +181,24 @@ const takePicture = async () => {
 </script>
 
 <template>
-  <h1>ResultPage</h1>
+
+  <div class="q-pa-md q-gutter-sm row"
+    v-if="!takingPicture"
+  >
+    <!-- <q-btn color="primary" icon="file_upload" label="Existing picture" /> -->
+    <q-btn color="primary" outline icon-right="photo_camera" label="Take picture"
+      class="col-12"
+      size="lg"
+      @click="startCamera"
+    />
+    <q-file color="primary" outlined label-color="primary" v-model="model" label="Existing picture"
+      class="col-12"
+    >
+      <template v-slot:append>
+        <q-icon name="attachment" color="primary" />
+      </template>
+    </q-file>
+  </div>
 
   <div class="q-pa-lg">
     <input type="file" accept="image/*" @change="updateSrcImage" />
@@ -224,53 +257,30 @@ const takePicture = async () => {
     </q-list>
   </div>
 
-  <div class="flex q-pa-lg">
-    <q-space />
-    <img id="imgSrc" style="width: 30%; height: 30%" ref="imgSrcElement" />
-    <q-space />
-    <canvas id="resultImg" ref="resultImgRef" />
-    <q-space />
-  </div>
+  <!-- <input type="file" accept="image/*" @change="updateSrcImage" /> -->
 
-  <div class="flex q-pa-lg">
-    <q-space />
-    <q-btn
-      @click="previousLego"
-      outline
-      rounded
-      color="secondary"
-      label="Previous"
-    />
 
-    <q-btn
-      @click="takePicture"
-      v-if="cameraActive"
-      outline
-      rounded
-      color="standard"
-      label="Prendre une photo"
-    />
+  <!-- <img id="imgSrc" style="width: 30%; height: 30%" ref="imgSrcElement" />
+  <canvas id="resultImg" ref="resultImgRef" /> -->
 
-    <q-btn
-      @click="startCamera"
-      v-if="!cameraActive"
-      outline
-      rounded
-      color="standard"
-      label="Démarrer la caméra"
-    />
+  <button @click="previousLego" v-if="pictureTaken">Previous</button>
+  <button @click="nextLego" v-if="pictureTaken">Next</button>
 
-    <q-btn @click="nextLego" outline rounded color="primary" label="Next" />
-    <q-space />
-  </div>
+  <full-screen-cam
+    v-if="takingPicture"
+    v-model="pictureData"
+    @update:img="onImgUpdate"
+  />
 
-  <div class="flex q-pa-lg">
-    <q-space />
-    <camera
-      v-if="cameraActive"
-      :resolution="{ width: 375, height: 812 }"
-      ref="cam"
-    ></camera>
-    <q-space />
+  <div class="q-mx-md">
+    <div class="q-mt-lg" v-if="pictureTaken">
+      <q-img
+        :src="pictureData"
+        :fit="scale - down"
+        :ratio="4 / 3"
+        spinner-color="white"
+        style="max-width: 100%"
+      />
+    </div>
   </div>
 </template>
