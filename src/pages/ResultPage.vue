@@ -112,9 +112,8 @@ const processImage = () => {
     legoCounter.value
   );
 
-  //caracteristic.value = "Bonjour"; //  ! TODO FIX : Not working
-
   // Show the image using the canvas
+  resultImgRef.value.style.height = null;
   cv.imshow(resultImgRef.value, singleLegoBorder_mat);
 
   // Release memory
@@ -137,6 +136,9 @@ const startCamera = () => {
   // Hide the image
   imgSrcElement.value.style.display = "none";
   resultImgRef.value.style.display = "none";
+
+  // Erase previous datas
+  caracteristic.value = null;
 
   cameraActive.value = true;
   // cam.value.start();
@@ -165,22 +167,110 @@ const takePicture = async () => {
 <template>
   <h1>ResultPage</h1>
 
-  <p>{{ caracteristic }}</p>
+  <div class="q-pa-lg">
+    <input type="file" accept="image/*" @change="updateSrcImage" />
+  </div>
 
-  <input type="file" accept="image/*" @change="updateSrcImage" />
+  <div v-if="caracteristic" class="q-pa-lg">
+    <q-list bordered separator>
+      <q-item v-if="caracteristic.gcx">
+        <q-item-section>
+          <q-item-label overline>Gravity Center X</q-item-label>
+          <q-item-label>{{ caracteristic.gcx }}</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item v-if="caracteristic.gcy">
+        <q-item-section>
+          <q-item-label overline>Gravity Center Y</q-item-label>
+          <q-item-label>{{ caracteristic.gcy }}</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item v-if="caracteristic.circularity">
+        <q-item-section>
+          <q-item-label overline>Circularity</q-item-label>
+          <q-item-label>{{ caracteristic.circularity }}</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item v-if="caracteristic.allongement">
+        <q-item-section>
+          <q-item-label overline>Allongement</q-item-label>
+          <q-item-label>{{ caracteristic.allongement }}</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item v-if="caracteristic.excentricity">
+        <q-item-section>
+          <q-item-label overline>Eccentricity</q-item-label>
+          <q-item-label>{{ caracteristic.excentricity }}</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item v-if="caracteristic.area">
+        <q-item-section>
+          <q-item-label overline>Area</q-item-label>
+          <q-item-label>{{ caracteristic.area }}</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item v-if="caracteristic.perimeter">
+        <q-item-section>
+          <q-item-label overline>Perimeter</q-item-label>
+          <q-item-label>{{ caracteristic.perimeter }}</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item v-if="caracteristic.class">
+        <q-item-section>
+          <q-item-label overline>Class</q-item-label>
+          <q-item-label>{{ caracteristic.class }}</q-item-label>
+        </q-item-section>
+      </q-item>
+    </q-list>
+  </div>
 
-  <img id="imgSrc" style="width: 30%; height: 30%" ref="imgSrcElement" />
-  <canvas id="resultImg" ref="resultImgRef" />
+  <div class="flex q-pa-lg">
+    <q-space />
+    <img id="imgSrc" style="width: 30%; height: 30%" ref="imgSrcElement" />
+    <q-space />
+    <canvas id="resultImg" ref="resultImgRef" />
+    <q-space />
+  </div>
 
-  <button @click="startCamera" v-if="!cameraActive">Démarrer la caméra</button>
-  <button @click="previousLego">Previous</button>
-  <button @click="nextLego">Next</button>
+  <div class="flex q-pa-lg">
+    <q-space />
+    <q-btn
+      @click="previousLego"
+      outline
+      rounded
+      color="secondary"
+      label="Previous"
+    />
 
-  <button @click="takePicture" v-if="cameraActive">Prendre une photo</button>
+    <q-btn
+      @click="takePicture"
+      v-if="cameraActive"
+      outline
+      rounded
+      color="standard"
+      label="Prendre une photo"
+    />
 
-  <camera
-    v-if="cameraActive"
-    :resolution="{ width: 375, height: 812 }"
-    ref="cam"
-  ></camera>
+    <q-btn
+      @click="startCamera"
+      v-if="!cameraActive"
+      outline
+      rounded
+      color="standard"
+      label="Démarrer la caméra"
+    />
+
+    <q-btn @click="nextLego" outline rounded color="primary" label="Next" />
+    <q-space />
+  </div>
+
+  <div class="flex q-pa-lg">
+    <q-space />
+    <camera
+      v-if="cameraActive"
+      :resolution="{ width: 375, height: 812 }"
+      ref="cam"
+    ></camera>
+    <q-space />
+  </div>
 </template>
