@@ -36,7 +36,11 @@ const onImgUpdate = (img) => {
   pictureTaken.value = true;
 
   legoCounter.value = 0;
-  processImage();
+
+  // When image is loaded, process it
+  imgSrcElement.value.onload = () => {
+    processImage();
+  };
 };
 
 const takingPicture = ref(false); // User is taking a picture
@@ -45,6 +49,7 @@ const pictureUrl = ref(null); // Picture url
 const pictureData = ref(null);
 
 const legoCounter = ref(0);
+const legoNumber = ref(0);
 const caracteristic = ref(null);
 
 const edgesLaplacian = (mat) => {
@@ -115,6 +120,10 @@ const legoCaracterise = (processed_mat, source_mat, i) => {
   let color = new cv.Scalar(255, 255, 255);
   let singleLegoBorder_mat = source_mat.clone();
   cv.drawContours(singleLegoBorder_mat, convex_hulls, i, color, 2, cv.LINE_8);
+
+  // Set the number of lego
+  legoNumber.value = convex_hulls.size();
+
   return singleLegoBorder_mat;
 };
 
@@ -155,25 +164,6 @@ const startCamera = () => {
   caracteristic.value = null;
 
   takingPicture.value = true;
-};
-
-const takePicture = async () => {
-  const picture = await cam.value.snapshot();
-  imgSrcElement.value.src = URL.createObjectURL(picture);
-
-  // Stop the camera
-  cam.value.stop();
-  cameraActive.value = false;
-
-  // Display the image
-  imgSrcElement.value.style.display = "inline-block";
-  resultImgRef.value.style.display = "inline-block";
-
-  // When image is loaded, process it
-  imgSrcElement.value.onload = () => {
-    legoCounter.value = 0;
-    processImage();
-  };
 };
 </script>
 
@@ -251,12 +241,16 @@ const takePicture = async () => {
     </q-list>
   </div>
 
-  <img id="imgSrc" style="width: 30%; height: 30%; display: none;"  ref="imgSrcElement" />
+  <img id="imgSrc" style="display: none;"  ref="imgSrcElement" />
   <canvas id="resultImg" ref="resultImgRef" />
 
   <div v-if="pictureTaken">
-    <q-btn @click="previousLego" push color="white" text-color="primary" label="Previous" />
-    <q-btn @click="nextLego" push color="white" text-color="primary" label="Next" />
+    <q-btn @click="previousLego" push color="white" text-color="primary" label="Previous"
+      :disable="legoCounter == 0"
+    />
+    <q-btn @click="nextLego" push color="white" text-color="primary" label="Next"
+      :disable="legoCounter == legoNumber - 1"
+    />
   </div>
 
   <full-screen-cam
