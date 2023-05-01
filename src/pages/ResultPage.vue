@@ -47,6 +47,8 @@ const takingPicture = ref(false); // User is taking a picture
 const pictureTaken = ref(false); // Picture has been taken
 const pictureUrl = ref(null); // Picture url
 const pictureData = ref(null);
+const pictureWidth = ref(null);
+const pictureHeight = ref(null);
 
 const legoCounter = ref(0);
 const legoNumber = ref(0);
@@ -92,10 +94,12 @@ const updateSrcImage = () => {
 
   // When image is loaded, process it
   imgSrcElement.value.onload = () => {
+    pictureWidth.value = imgSrcElement.value.width;
+    pictureHeight.value = imgSrcElement.value.height;
+    
     processImage();
   };
 };
-
 
 const convexEnvelopeDetection = (mat, source) => {
   const borders = findBorders(mat);
@@ -242,9 +246,12 @@ const startCamera = () => {
   </div>
 
   <img id="imgSrc" style="display: none;"  ref="imgSrcElement" />
-  <canvas id="resultImg" ref="resultImgRef" />
+  <canvas id="resultImg"
+    v-if="!takingPicture"
+    style="height: 100%; width: 100%;"
+    ref="resultImgRef" />
 
-  <div v-if="pictureTaken">
+  <div v-if="pictureTaken && !takingPicture">
     <q-btn @click="previousLego" push color="white" text-color="primary" label="Previous"
       :disable="legoCounter == 0"
     />
