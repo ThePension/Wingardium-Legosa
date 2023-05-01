@@ -91,7 +91,7 @@ const legoCaracterise = (processed_mat, source_mat, i) => {
   const convex_hulls = find_convex_hull(borders);
 
   let hull = convex_hulls.get(i);
-  caracterise(hull);
+  caracteristic.value = caracterise(hull);
   let color = new cv.Scalar(255, 255, 255);
   let singleLegoBorder_mat = source_mat.clone();
   cv.drawContours(singleLegoBorder_mat, convex_hulls, i, color, 2, cv.LINE_8);
@@ -112,7 +112,7 @@ const processImage = () => {
     legoCounter.value
   );
 
-  caracteristic.value.text = "Bonjour"; //  ! TODO FIX : Not working
+  //caracteristic.value = "Bonjour"; //  ! TODO FIX : Not working
 
   // Show the image using the canvas
   cv.imshow(resultImgRef.value, singleLegoBorder_mat);
@@ -165,7 +165,7 @@ const takePicture = async () => {
 <template>
   <h1>ResultPage</h1>
 
-  <p ref="caracteristic">TEST</p>
+  <p>{{ caracteristic }}</p>
 
   <input type="file" accept="image/*" @change="updateSrcImage" />
 

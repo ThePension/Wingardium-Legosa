@@ -241,21 +241,21 @@ function moments(border) {
 }
 
 function area(border) {
-  return cv.contourArea(border, false);
+  return cv.contourArea(border, false).toFixed(3);
 }
 
 function perimeter(border) {
-  return cv.arcLength(border, false);
+  return cv.arcLength(border, false).toFixed(3);
 }
 
 function gravity_center_dx(border) {
   let M = moments(border);
-  return M.m10 / M.m00;
+  return (M.m10 / M.m00).toFixed(3);
 }
 
 function gravity_center_dy(border) {
   let M = moments(border);
-  return M.m01 / M.m00;
+  return (M.m01 / M.m00).toFixed(3);
 }
 
 function bounding_rect(border) {
@@ -278,14 +278,14 @@ function excentricite(border) {
     factor = h / w;
   }
 
-  return Math.sqrt(1 - factor);
+  return Math.sqrt(1 - factor).toFixed(3);
 }
 
 function circularity(border) {
   let a = area(border);
   let p = perimeter(border);
 
-  return (4 * Math.PI * a) / (p * p);
+  return ((4 * Math.PI * a) / (p * p)).toFixed(3);
 }
 
 function allongement(border) {
@@ -300,7 +300,7 @@ function allongement(border) {
     allong = h / w;
   }
 
-  return allong;
+  return allong.toFixed(3);
 }
 
 /**
