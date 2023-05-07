@@ -192,8 +192,30 @@ const startCamera = () => {
     </q-file>
   </div>
 
-  <div v-if="caracteristic" class="q-pa-lg">
+  <img id="imgSrc" style="display: none;"  ref="imgSrcElement" />
+
+  <canvas id="resultImg"
+    v-if="!takingPicture"
+    :style="{ height: pictureWidth / pictureHeight * 100 + '%', width: '100%' }"
+    ref="resultImgRef" />
+
+  <div v-if="pictureTaken && !takingPicture" class="row justify-between q-px-md">
+    <q-btn @click="previousLego" push color="white" text-color="primary" label="Previous"
+      :disable="legoCounter == 0"
+    />
+    <q-btn @click="nextLego" push color="white" text-color="primary" label="Next"
+      :disable="legoCounter == legoNumber - 1"
+    />
+  </div>
+
+  <div v-if="caracteristic" class="q-pa-md">
     <q-list bordered separator>
+      <q-item v-if="caracteristic.class">
+        <q-item-section>
+          <q-item-label overline>Class</q-item-label>
+          <q-item-label>{{ caracteristic.class }}</q-item-label>
+        </q-item-section>
+      </q-item>
       <q-item v-if="caracteristic.gcx">
         <q-item-section>
           <q-item-label overline>Gravity Center X</q-item-label>
@@ -236,28 +258,7 @@ const startCamera = () => {
           <q-item-label>{{ caracteristic.perimeter }}</q-item-label>
         </q-item-section>
       </q-item>
-      <q-item v-if="caracteristic.class">
-        <q-item-section>
-          <q-item-label overline>Class</q-item-label>
-          <q-item-label>{{ caracteristic.class }}</q-item-label>
-        </q-item-section>
-      </q-item>
     </q-list>
-  </div>
-
-  <img id="imgSrc" style="display: none;"  ref="imgSrcElement" />
-  <canvas id="resultImg"
-    v-if="!takingPicture"
-    style="height: 100%; width: 100%;"
-    ref="resultImgRef" />
-
-  <div v-if="pictureTaken && !takingPicture">
-    <q-btn @click="previousLego" push color="white" text-color="primary" label="Previous"
-      :disable="legoCounter == 0"
-    />
-    <q-btn @click="nextLego" push color="white" text-color="primary" label="Next"
-      :disable="legoCounter == legoNumber - 1"
-    />
   </div>
 
   <full-screen-cam
