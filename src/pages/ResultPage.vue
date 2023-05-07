@@ -98,7 +98,7 @@ const updateSrcImage = () => {
   imgSrcElement.value.onload = () => {
     pictureWidth.value = imgSrcElement.value.width;
     pictureHeight.value = imgSrcElement.value.height;
-    
+
     processImage();
   };
 };
@@ -137,6 +137,14 @@ const processImage = () => {
   // Read image from src
   const source = cv.imread(imgSrcElement.value); // imgSrcElement
 
+  // Resize the source
+  const ratio = pictureWidth.value / pictureHeight.value;
+  const newWidth = 250;
+
+  const dsize = new cv.Size(newWidth, newWidth / ratio);
+
+  cv.resize(source, source, dsize, 0, 0, cv.INTER_AREA);
+
   // Processing
   const processed_mat = edgesLaplacian(source);
 
@@ -172,17 +180,23 @@ const startCamera = () => {
 </script>
 
 <template>
-
-  <div class="q-pa-md q-gutter-sm row"
-    v-if="!takingPicture"
-  >
-    <q-btn color="primary" outline icon-right="photo_camera" label="Take picture"
+  <div class="q-pa-md q-gutter-sm row" v-if="!takingPicture">
+    <q-btn
+      color="primary"
+      outline
+      icon-right="photo_camera"
+      label="Take picture"
       class="col-12"
       size="lg"
       align="between"
       @click="startCamera"
     />
-    <q-file color="primary" outlined label-color="primary" v-model="existingFile" label="Existing picture"
+    <q-file
+      color="primary"
+      outlined
+      label-color="primary"
+      v-model="existingFile"
+      label="Existing picture"
       @update:model-value="updateSrcImage"
       class="col-12"
     >
@@ -192,18 +206,32 @@ const startCamera = () => {
     </q-file>
   </div>
 
-  <img id="imgSrc" style="display: none;"  ref="imgSrcElement" />
+  <img id="imgSrc" style="display: none" ref="imgSrcElement" />
 
   <canvas
     v-if="!takingPicture"
-    style="width: 100%; height: auto;"
-    ref="resultCanvasRef" />
+    style="width: 100%; height: auto"
+    ref="resultCanvasRef"
+  />
 
-  <div v-if="pictureTaken && !takingPicture" class="row justify-between q-px-md">
-    <q-btn @click="previousLego" push color="white" text-color="primary" label="Previous"
+  <div
+    v-if="pictureTaken && !takingPicture"
+    class="row justify-between q-px-md"
+  >
+    <q-btn
+      @click="previousLego"
+      push
+      color="white"
+      text-color="primary"
+      label="Previous"
       :disable="legoCounter == 0"
     />
-    <q-btn @click="nextLego" push color="white" text-color="primary" label="Next"
+    <q-btn
+      @click="nextLego"
+      push
+      color="white"
+      text-color="primary"
+      label="Next"
       :disable="legoCounter == legoNumber - 1"
     />
   </div>
