@@ -372,8 +372,8 @@ function guess_label(caracteristics) {
 function caracterise(hull) {
   let c = {};
 
-  console.log(hull);
-  console.log();
+  // console.log(hull);
+  // console.log();
 
   let LEGO_gcx = gravity_center_dx(hull);
   let LEGO_gcy = gravity_center_dy(hull);

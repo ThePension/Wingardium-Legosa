@@ -9,7 +9,6 @@ const routes = [
         alias: "/index",
         component: () => import("pages/ResultPage.vue"),
       },
-      { path: "/about", component: () => import("pages/AboutPage.vue") },
     ],
   },
 
