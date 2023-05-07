@@ -22,7 +22,7 @@ import {
 import FullScreenCam from "src/components/FullScreenCam.vue";
 
 const imgSrcElement = ref(null);
-const resultImgRef = ref(null);
+const resultCanvasRef = ref(null);
 
 const existingFile = ref(null);
 
@@ -46,9 +46,11 @@ const onImgUpdate = (img) => {
 const takingPicture = ref(false); // User is taking a picture
 const pictureTaken = ref(false); // Picture has been taken
 const pictureUrl = ref(null); // Picture url
+const pictureResultUrl = ref(null); // Picture result url
 const pictureData = ref(null);
 const pictureWidth = ref(null);
 const pictureHeight = ref(null);
+const pictureRatio = ref(null);
 
 const legoCounter = ref(0);
 const legoNumber = ref(0);
@@ -123,7 +125,7 @@ const legoCaracterise = (processed_mat, source_mat, i) => {
   caracteristic.value = caracterise(hull);
   let color = new cv.Scalar(255, 255, 255);
   let singleLegoBorder_mat = source_mat.clone();
-  cv.drawContours(singleLegoBorder_mat, convex_hulls, i, color, 2, cv.LINE_8);
+  cv.drawContours(singleLegoBorder_mat, convex_hulls, i, color, 5, cv.LINE_8);
 
   // Set the number of lego
   legoNumber.value = convex_hulls.size();
@@ -144,9 +146,38 @@ const processImage = () => {
     legoCounter.value
   );
 
-  // Show the image using the canvas
-  resultImgRef.value.style.height = null;
-  cv.imshow(resultImgRef.value, singleLegoBorder_mat);
+  // // Resize the canvas to the image size
+  // resultCanvasRef.value.width = source.cols;
+  // resultCanvasRef.value.height = source.rows;
+
+  pictureWidth.value = imgSrcElement.value.width;
+  pictureHeight.value = imgSrcElement.value.height;
+
+  const newMatWidth = window.innerWidth;
+  const newMathHeight = newMatWidth * (pictureHeight.value / pictureWidth.value);
+
+  console.log("New width: " + newMatWidth);
+  console.log("New height: " + newMathHeight);
+
+  // alert("New width: " + newMatWidth);
+  // alert("New height: " + newMathHeight);
+
+  // Resize the mat to fit the screen size
+  cv.resize(singleLegoBorder_mat, singleLegoBorder_mat, new cv.Size(newMatWidth, newMathHeight));
+
+  // Show the image using the canvas, and keep the aspect ratio
+  cv.imshow(resultCanvasRef.value, singleLegoBorder_mat);
+  // resultCanvasRef.value.display = "none";
+
+  // Get an image from the canvas
+  // pictureResultUrl.value = resultCanvasRef.value.toDataURL("image/png");
+
+  // Set the image to the src
+  
+
+  // Keep the aspect ratio
+  // resultCanvasRef.value.style.width = "100%";
+  // resultCanvasRef.value.style.height = "auto";
 
   // Release memory
   processed_mat.delete();
@@ -192,12 +223,19 @@ const startCamera = () => {
     </q-file>
   </div>
 
-  <img id="imgSrc" style="display: none;"  ref="imgSrcElement" />
+  <img id="imgSrc" style="display: none; width: 100%; height: 500px;"  ref="imgSrcElement" />
+
+  <div v-if="!takingPicture">
+    <h2>Results</h2>
+    <q-img ref="resultImgRef" :src="pictureResultUrl"
+      class="q-ma-md"
+    />
+    <!-- style="width: 100%; height: auto;"  -->
+  </div>
 
   <canvas id="resultImg"
     v-if="!takingPicture"
-    :style="{ height: pictureWidth / pictureHeight * 100 + '%', width: '100%' }"
-    ref="resultImgRef" />
+    ref="resultCanvasRef" />
 
   <div v-if="pictureTaken && !takingPicture" class="row justify-between q-px-md">
     <q-btn @click="previousLego" push color="white" text-color="primary" label="Previous"

@@ -83,7 +83,7 @@ onMounted(() => {
   screenHeight.value = window.innerHeight;
 
   // Get screen ratio
-  screenRatio.value = 1; // screenWidth.value / screenHeight.value;
+  screenRatio.value = 1; screenWidth.value / screenHeight.value;
 
   startCamera();
 });
