@@ -391,24 +391,24 @@ function caracterise(hull) {
 
   c.class = guess_label(c);
 
-  console.log(
-    "LEGO : gcx=" +
-      LEGO_gcx +
-      ", gcy=" +
-      LEGO_gcy +
-      ", circularity=" +
-      LEGO_circ +
-      ", allongement=" +
-      LEGO_allong +
-      ", excentricity=" +
-      LEGO_excen +
-      ", area=" +
-      c.area +
-      ", perimeter=" +
-      c.perimeter +
-      ", class=" +
-      c.class
-  );
+  // console.log(
+  //   "LEGO : gcx=" +
+  //     LEGO_gcx +
+  //     ", gcy=" +
+  //     LEGO_gcy +
+  //     ", circularity=" +
+  //     LEGO_circ +
+  //     ", allongement=" +
+  //     LEGO_allong +
+  //     ", excentricity=" +
+  //     LEGO_excen +
+  //     ", area=" +
+  //     c.area +
+  //     ", perimeter=" +
+  //     c.perimeter +
+  //     ", class=" +
+  //     c.class
+  // );
 
   return c;
 }
