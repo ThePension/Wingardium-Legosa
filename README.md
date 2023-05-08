@@ -1,45 +1,7 @@
-# wingardium-legosa (wingardium-legosa)
+# wingardium-legosa
 
-A Quasar Project
+An image processing project built with Vue.js and Quasar that reveals the magic of your LEGO.
 
-## Install the dependencies
+## Production
 
-```bash
-yarn
-# or
-npm install
-```
-
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
-
-```bash
-quasar dev
-```
-
-### Lint the files
-
-```bash
-yarn lint
-# or
-npm run lint
-```
-
-### Format the files
-
-```bash
-yarn format
-# or
-npm run format
-```
-
-### Build the app for production
-
-```bash
-quasar build
-```
-
-### Deploy the app on Vercel
-
-```
-vercel --prod
-```
+Available on this url : https://wingardium-legosa.vercel.app/#/
